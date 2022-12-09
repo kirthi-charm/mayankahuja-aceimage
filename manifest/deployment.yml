@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: mayankahuja/aceimage 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mayankahuja/aceimage:12.0.6.0-r1
+  template:
+    metadata:
+      labels:
+        app: mayankahuja/aceimage:12.0.6.0-r1
+    spec:
+      containers:
+        - name: :apptest
+          image: mycontainerregistry08122022.azurecr.io/mayankahuja/aceimage
+          ports:
+          - containerPort: 7600

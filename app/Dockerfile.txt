@@ -1,0 +1,21 @@
+FROM mayankahuja/aceimage:12.0.6.0-r1
+RUN
+RUN
+RUN RUN /bin/sh -c microdnf update \
+    && microdnf install findutils util-linux \
+    && microdnf clean all # buildkit
+RUN RUN /bin/sh -c microdnf reinstall tzdata -y # buildkit
+RUN ENV DEBIAN_FRONTEND=noninteractive
+RUN COPY /opt/ibm/ace-12 /opt/ibm/ace-12 # buildkit
+RUN RUN /bin/sh -c /opt/ibm/ace-12/ace make registry global accept license deferred     \
+    && useradd --uid 1001 --create-home --home-dir /home/aceuser --shell /bin/bash -G mqbrkrs aceuser     \
+    && su - aceuser -c "export LICENSE=accept \
+    && . /opt/ibm/ace-12/server/bin/mqsiprofile \
+    && mqsicreateworkdir /home/aceuser/ace-server"     \
+    && echo ". /opt/ibm/ace-12/server/bin/mqsiprofile" >> /home/aceuser/.bashrc # buildkit
+RUN COPY git.commit* /home/aceuser/ # buildkit
+RUN COPY /licenses/ /licenses/ # buildkit
+RUN USER 1001
+RUN EXPOSE map[7600/tcp:{} 7800/tcp:{} 7843/tcp:{}]
+RUN ENTRYPOINT ["bash" "-c" ". /opt/ibm/ace-12/server/bin/mqsiprofile \
+    && IntegrationServer -w /home/aceuser/ace-server"]
